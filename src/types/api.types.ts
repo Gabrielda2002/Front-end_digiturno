@@ -54,10 +54,10 @@ export type Usuario = {
   id: string;
   nombre: string;
   email: string;
-  rol: RolUsuario;
+  rol: string;
   sede_id?: string;
   activo: boolean;
-  sede?: Sede;
+  sede?: string;
   created_at?: string;
   updated_at?: string;
 };
