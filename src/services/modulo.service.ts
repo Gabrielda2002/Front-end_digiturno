@@ -7,6 +7,11 @@ export const moduloService = {
     return response.data;
   },
 
+  getAllModulos: async (): Promise<Modulo[]> => {
+    const response = await api.get<Modulo[]>('/modulos');
+    return response.data;
+  },
+
   getModuloById: async (id: string): Promise<Modulo> => {
     const response = await api.get<Modulo>(`/modulos/${id}`);
     return response.data;

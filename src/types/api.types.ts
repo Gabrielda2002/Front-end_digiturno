@@ -26,6 +26,7 @@ export type Modulo = {
   nombre: string;
   numero: number;
   activo: boolean;
+  operador_id: string;
   created_at?: string;
   updated_at?: string;
 };

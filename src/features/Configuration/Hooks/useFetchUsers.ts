@@ -1,6 +1,6 @@
+import { usuarioService } from "@/services/usuario.service";
+import { Usuario } from "@/types/api.types";
 import { useCallback, useEffect, useState } from "react";
-import { Usuario } from "../types/api.types";
-import { usuarioService } from "../services/usuario.service";
 
 export const useFetchUsers = () => {
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
