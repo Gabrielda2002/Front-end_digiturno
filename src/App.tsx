@@ -7,7 +7,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Turnos from './pages/Turnos';
 import Reportes from './pages/Reportes';
-import Configuracion from './pages/Configuracion';
+import Configuracion from './features/Configuration/Page/Configuracion';
 import AutoServicio from './pages/AutoServicio';
 import PantallaTV from './pages/PantallaTV';
 

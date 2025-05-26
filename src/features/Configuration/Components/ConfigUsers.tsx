@@ -1,12 +1,12 @@
 import { useState } from "react";
-import Card from "../ui/Card";
-import Input from "../ui/Input";
-import Button from "../ui/Button";
-import { useFetchUsers } from "../../hooks/useFetchUsers";
+import Card from "../../../components/ui/Card";
+import Input from "../../../components/ui/Input";
+import Button from "../../../components/ui/Button";
+import { useFetchUsers } from "../Hooks/useFetchUsers";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { usuarioService } from "../../services/usuario.service";
+import { usuarioService } from "../../../services/usuario.service";
 
 export const ConfigUsers = () => {
   const { usuarios, loading, error, refreshUsers } = useFetchUsers();
