@@ -68,7 +68,9 @@ const {
           sede_id: data.sede_id
         };
 
-        await moduloService.updateModulo(data.id, moduloData)
+        await moduloService.updateModulo(data.id, moduloData);
+        fetchModulos();
+        toast.success("Módulo actualizado correctamente");
 
       } else {
         await moduloService.createModulo({
@@ -79,11 +81,13 @@ const {
           sede_id: data.sede_id
         });
       }
-
+      toast.success("Módulo guardado correctamente");
+      fetchModulos();
       reset();
       setIsEditing(false);
     } catch (error) {
       console.error("Error al guardar el módulo:", error);
+      toast.error("Error al guardar el módulo. Por favor, inténtelo de nuevo.");
     }
   };
 

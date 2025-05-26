@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import { ToastContainer } from 'react-toastify';
 
 // Pages
 import Login from './pages/Login';
@@ -17,9 +18,6 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 // Store
 import { useAuthStore } from './store/authStore';
 import { useSedeStore } from './store/sedeStore';
-
-// Context
-import { NotificacionesProvider } from './contexts/NotificacionesContext';
 
 function App() {
   const { isAuthenticated, authChecked, checkAuth } = useAuthStore();
@@ -48,7 +46,6 @@ function App() {
   }
 
   return (
-    <NotificacionesProvider>
       <BrowserRouter>
       <Routes>
         {/* Rutas públicas */}
@@ -109,8 +106,19 @@ function App() {
           </div>
         } />
       </Routes>
+      <ToastContainer 
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </BrowserRouter>
-    </NotificacionesProvider>
   );
 }
 
