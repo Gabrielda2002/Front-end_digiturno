@@ -3,8 +3,8 @@ import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Card from '../../../components/ui/Card';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
-import { useSedeStore } from '@/store/sedeStore';
 import { ConfigUsers } from '@/features/Configuration/Components/ConfigUsers';
+import ConfigModulos from '../Components/ConfigModulos';
 
 const Configuracion = () => {
   const [activeTab, setActiveTab] = useState('sedes');
@@ -60,7 +60,7 @@ const Configuracion = () => {
             {activeTab === 'sedes' && <ConfigSedes />}
             {activeTab === 'motivos' && <ConfigMotivos />}
             {activeTab === 'modulos' && <ConfigModulos />}
-            {activeTab === 'usuarios' && <ConfigUsuarios />}
+            {activeTab === 'usuarios' && <ConfigUsers />}
             {activeTab === 'general' && <ConfigGeneral />}
           </div>
         </div>
@@ -382,147 +382,6 @@ const ConfigMotivos = () => {
       </div>
     </Card>
   );
-};
-
-const ConfigModulos = () => {
-  const { currentSede } = useSedeStore();
-  const [modulos, setModulos] = useState<any[]>([
-    { id: '1', numero: 1, nombre: 'Ventanilla 1', operador: 'Juan Pérez', activo: true },
-    { id: '2', numero: 2, nombre: 'Ventanilla 2', operador: 'María López', activo: true },
-    { id: '3', numero: 3, nombre: 'Ventanilla 3', operador: 'Pedro Gómez', activo: false }
-  ]);
-  const [formData, setFormData] = useState({ id: '', numero: '', nombre: '', operador: '', activo: true });
-  const [isEditing, setIsEditing] = useState(false);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isEditing) {
-      setModulos(prev => prev.map(modulo => 
-        modulo.id === formData.id ? formData : modulo
-      ));
-    } else {
-      setModulos(prev => [...prev, { ...formData, id: Date.now().toString() }]);
-    }
-    resetForm();
-  };
-  
-  const handleEdit = (modulo: any) => {
-    setFormData(modulo);
-    setIsEditing(true);
-  };
-  
-  const resetForm = () => {
-    setFormData({ id: '', numero: '', nombre: '', operador: '', activo: true });
-    setIsEditing(false);
-  };
-  
-  return (
-    <Card>
-      <h2 className="text-xl font-semibold mb-4">
-        Gestión de Módulos {currentSede && `(${currentSede.nombre})`}
-      </h2>
-      
-      <form onSubmit={handleSubmit} className="mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <Input 
-            label="Número de módulo" 
-            name="numero"
-            type="number"
-            min={1}
-            value={formData.numero.toString()} 
-            onChange={handleChange} 
-            required
-          />
-          <Input 
-            label="Nombre del módulo" 
-            name="nombre"
-            value={formData.nombre} 
-            onChange={handleChange} 
-            required
-          />
-          <Input 
-            label="Operador asignado" 
-            name="operador"
-            value={formData.operador} 
-            onChange={handleChange} 
-          />
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="activoModulo"
-              name="activo"
-              checked={formData.activo}
-              onChange={handleChange}
-              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-            />
-            <label htmlFor="activoModulo" className="ml-2 block text-sm text-gray-700">
-              Módulo activo
-            </label>
-          </div>
-        </div>
-        <div className="flex space-x-2">
-          <Button type="submit" variant="primary">
-            {isEditing ? 'Actualizar módulo' : 'Agregar módulo'}
-          </Button>
-          {isEditing && (
-            <Button type="button" variant="secondary" onClick={resetForm}>
-              Cancelar
-            </Button>
-          )}
-        </div>
-      </form>
-      
-      <div className="mt-6 overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Operador</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {modulos.map((modulo) => (
-              <tr key={modulo.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3">{modulo.numero}</td>
-                <td className="px-4 py-3">{modulo.nombre}</td>
-                <td className="px-4 py-3">{modulo.operador || '-'}</td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${modulo.activo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                    {modulo.activo ? 'Activo' : 'Inactivo'}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right space-x-2">
-                  <button
-                    onClick={() => handleEdit(modulo)}
-                    className="text-indigo-600 hover:text-indigo-900"
-                  >
-                    Editar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
-  );
-};
-
-const ConfigUsuarios = () => {
-  return (
-    <ConfigUsers/>
-  )
 };
 
 const ConfigGeneral = () => {
