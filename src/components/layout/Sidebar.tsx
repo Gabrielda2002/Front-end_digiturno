@@ -54,7 +54,7 @@ const Sidebar: FC = () => {
     { name: 'Configuración', to: '/configuracion', icon: Cog8ToothIcon, show: isAdmin }
   ];
 
-  const filteredNavigation = navigation.filter(item => item.show);
+  // const filteredNavigation = navigation.filter(item => item.show);
 
   return (
     <>
@@ -67,7 +67,7 @@ const Sidebar: FC = () => {
                 <span className="text-white font-bold text-xl">DigiTurno</span>
               </div>
               <nav className="mt-5 flex-1 px-2 space-y-1">
-                {filteredNavigation.map((item) => (
+                {navigation.map((item) => (
                   <NavItem
                     key={item.name}
                     to={item.to}
@@ -120,7 +120,7 @@ const Sidebar: FC = () => {
                   <span className="text-white font-bold text-xl">DigiTurno</span>
                 </div>
                 <nav className="mt-5 px-2 space-y-1">
-                  {filteredNavigation.map((item) => (
+                  {navigation.map((item) => (
                     <NavItem
                       key={item.name}
                       to={item.to}
