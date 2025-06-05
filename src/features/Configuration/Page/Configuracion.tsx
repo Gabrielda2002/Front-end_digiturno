@@ -5,6 +5,7 @@ import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import { ConfigUsers } from '@/features/Configuration/Components/ConfigUsers';
 import ConfigModulos from '../Components/ConfigModulos';
+import ConfigHeadquarters from '../Components/ConfigHeadquarters';
 
 const Configuracion = () => {
   const [activeTab, setActiveTab] = useState('sedes');
@@ -57,7 +58,7 @@ const Configuracion = () => {
           
           {/* Contenido principal */}
           <div className="flex-1">
-            {activeTab === 'sedes' && <ConfigSedes />}
+            {activeTab === 'sedes' && <ConfigHeadquarters />}
             {activeTab === 'motivos' && <ConfigMotivos />}
             {activeTab === 'modulos' && <ConfigModulos />}
             {activeTab === 'usuarios' && <ConfigUsers />}
@@ -66,137 +67,6 @@ const Configuracion = () => {
         </div>
       </div>
     </DashboardLayout>
-  );
-};
-
-// Componentes para cada sección de configuración
-const ConfigSedes = () => {
-  const [sedes, setSedes] = useState<any[]>([
-    { id: '1', nombre: 'Sede Principal', direccion: 'Calle 123, Ciudad', telefono: '123456789', activo: true },
-    { id: '2', nombre: 'Sede Norte', direccion: 'Av. Norte 456, Ciudad', telefono: '987654321', activo: true }
-  ]);
-  const [formData, setFormData] = useState({ id: '', nombre: '', direccion: '', telefono: '', activo: true });
-  const [isEditing, setIsEditing] = useState(false);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isEditing) {
-      setSedes(prev => prev.map(sede => 
-        sede.id === formData.id ? formData : sede
-      ));
-    } else {
-      setSedes(prev => [...prev, { ...formData, id: Date.now().toString() }]);
-    }
-    resetForm();
-  };
-  
-  const handleEdit = (sede: any) => {
-    setFormData(sede);
-    setIsEditing(true);
-  };
-  
-  const resetForm = () => {
-    setFormData({ id: '', nombre: '', direccion: '', telefono: '', activo: true });
-    setIsEditing(false);
-  };
-  
-  return (
-    <Card>
-      <h2 className="text-xl font-semibold mb-4">Gestión de Sedes</h2>
-      
-      <form onSubmit={handleSubmit} className="mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <Input 
-            label="Nombre de la sede" 
-            name="nombre"
-            value={formData.nombre} 
-            onChange={handleChange} 
-            required
-          />
-          <Input 
-            label="Dirección" 
-            name="direccion"
-            value={formData.direccion} 
-            onChange={handleChange} 
-            required
-          />
-          <Input 
-            label="Teléfono" 
-            name="telefono"
-            value={formData.telefono} 
-            onChange={handleChange} 
-            required
-          />
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="activo"
-              name="activo"
-              checked={formData.activo}
-              onChange={handleChange}
-              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-            />
-            <label htmlFor="activo" className="ml-2 block text-sm text-gray-700">
-              Sede activa
-            </label>
-          </div>
-        </div>
-        <div className="flex space-x-2">
-          <Button type="submit" variant="primary">
-            {isEditing ? 'Actualizar sede' : 'Agregar sede'}
-          </Button>
-          {isEditing && (
-            <Button type="button" variant="secondary" onClick={resetForm}>
-              Cancelar
-            </Button>
-          )}
-        </div>
-      </form>
-      
-      <div className="mt-6 overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dirección</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sedes.map((sede) => (
-              <tr key={sede.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3">{sede.nombre}</td>
-                <td className="px-4 py-3">{sede.direccion}</td>
-                <td className="px-4 py-3">{sede.telefono}</td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${sede.activo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                    {sede.activo ? 'Activa' : 'Inactiva'}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right space-x-2">
-                  <button
-                    onClick={() => handleEdit(sede)}
-                    className="text-indigo-600 hover:text-indigo-900"
-                  >
-                    Editar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
   );
 };
 
