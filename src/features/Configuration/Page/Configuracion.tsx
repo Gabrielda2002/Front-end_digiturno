@@ -6,6 +6,7 @@ import Input from '../../../components/ui/Input';
 import { ConfigUsers } from '@/features/Configuration/Components/ConfigUsers';
 import ConfigModulos from '../Components/ConfigModulos';
 import ConfigHeadquarters from '../Components/ConfigHeadquarters';
+import ConfigReason from '../Components/ConfigReason';
 
 const Configuracion = () => {
   const [activeTab, setActiveTab] = useState('sedes');
@@ -59,7 +60,7 @@ const Configuracion = () => {
           {/* Contenido principal */}
           <div className="flex-1">
             {activeTab === 'sedes' && <ConfigHeadquarters />}
-            {activeTab === 'motivos' && <ConfigMotivos />}
+            {activeTab === 'motivos' && <ConfigReason />}
             {activeTab === 'modulos' && <ConfigModulos />}
             {activeTab === 'usuarios' && <ConfigUsers />}
             {activeTab === 'general' && <ConfigGeneral />}
@@ -67,190 +68,6 @@ const Configuracion = () => {
         </div>
       </div>
     </DashboardLayout>
-  );
-};
-
-const ConfigMotivos = () => {
-  const [motivos, setMotivos] = useState<any[]>([
-    { id: '1', nombre: 'Información general', prefijo: 'A', color: '#3B82F6', prioridad: 1, tiempoEstimado: 5, activo: true },
-    { id: '2', nombre: 'Pagos', prefijo: 'B', color: '#10B981', prioridad: 2, tiempoEstimado: 10, activo: true },
-    { id: '3', nombre: 'Reclamos', prefijo: 'C', color: '#EF4444', prioridad: 3, tiempoEstimado: 15, activo: true }
-  ]);
-  const [formData, setFormData] = useState({
-    id: '', 
-    nombre: '', 
-    prefijo: '', 
-    color: '#3B82F6',
-    prioridad: 1,
-    tiempoEstimado: 5,
-    activo: true 
-  });
-  const [isEditing, setIsEditing] = useState(false);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isEditing) {
-      setMotivos(prev => prev.map(motivo => 
-        motivo.id === formData.id ? formData : motivo
-      ));
-    } else {
-      setMotivos(prev => [...prev, { ...formData, id: Date.now().toString() }]);
-    }
-    resetForm();
-  };
-  
-  const handleEdit = (motivo: any) => {
-    setFormData(motivo);
-    setIsEditing(true);
-  };
-  
-  const resetForm = () => {
-    setFormData({
-      id: '', 
-      nombre: '', 
-      prefijo: '', 
-      color: '#3B82F6',
-      prioridad: 1,
-      tiempoEstimado: 5,
-      activo: true 
-    });
-    setIsEditing(false);
-  };
-  
-  return (
-    <Card>
-      <h2 className="text-xl font-semibold mb-4">Gestión de Motivos de Visita</h2>
-      
-      <form onSubmit={handleSubmit} className="mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <Input 
-            label="Nombre del motivo" 
-            name="nombre"
-            value={formData.nombre} 
-            onChange={handleChange} 
-            required
-          />
-          <Input 
-            label="Prefijo (para tickets)" 
-            name="prefijo"
-            value={formData.prefijo} 
-            onChange={handleChange} 
-            required
-            maxLength={1}
-          />
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Color
-            </label>
-            <input
-              type="color"
-              name="color"
-              value={formData.color}
-              onChange={handleChange}
-              className="h-10 w-full p-1 border border-gray-300 rounded focus:ring-primary focus:border-primary"
-            />
-          </div>
-          <Input 
-            label="Prioridad (1-5)" 
-            name="prioridad"
-            type="number"
-            min={1}
-            max={5}
-            value={formData.prioridad.toString()} 
-            onChange={handleChange} 
-            required
-          />
-          <Input 
-            label="Tiempo estimado (min)" 
-            name="tiempoEstimado"
-            type="number"
-            min={1}
-            value={formData.tiempoEstimado.toString()} 
-            onChange={handleChange} 
-            required
-          />
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="activoMotivo"
-              name="activo"
-              checked={formData.activo}
-              onChange={handleChange}
-              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-            />
-            <label htmlFor="activoMotivo" className="ml-2 block text-sm text-gray-700">
-              Motivo activo
-            </label>
-          </div>
-        </div>
-        <div className="flex space-x-2">
-          <Button type="submit" variant="primary">
-            {isEditing ? 'Actualizar motivo' : 'Agregar motivo'}
-          </Button>
-          {isEditing && (
-            <Button type="button" variant="secondary" onClick={resetForm}>
-              Cancelar
-            </Button>
-          )}
-        </div>
-      </form>
-      
-      <div className="mt-6 overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prefijo</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Color</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prioridad</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiempo est.</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {motivos.map((motivo) => (
-              <tr key={motivo.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3">{motivo.nombre}</td>
-                <td className="px-4 py-3">{motivo.prefijo}</td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center">
-                    <div
-                      className="w-6 h-6 rounded-full mr-2"
-                      style={{ backgroundColor: motivo.color }}
-                    ></div>
-                    {motivo.color}
-                  </div>
-                </td>
-                <td className="px-4 py-3">{motivo.prioridad}</td>
-                <td className="px-4 py-3">{motivo.tiempoEstimado} min</td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${motivo.activo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                    {motivo.activo ? 'Activo' : 'Inactivo'}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right space-x-2">
-                  <button
-                    onClick={() => handleEdit(motivo)}
-                    className="text-indigo-600 hover:text-indigo-900"
-                  >
-                    Editar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
   );
 };
 

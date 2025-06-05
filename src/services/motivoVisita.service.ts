@@ -2,6 +2,12 @@ import api from './api';
 import { MotivoVisita } from '../types/api.types';
 
 export const motivoVisitaService = {
+
+  getAllMotivos: async (): Promise<MotivoVisita[]> => {
+    const response = await api.get<MotivoVisita[]>('/motivos-visita');
+    return response.data;
+  },
+
   getMotivosBySede: async (sedeId: string): Promise<MotivoVisita[]> => {
     const response = await api.get<MotivoVisita[]>(`/motivos-visita/sede/${sedeId}`);
     return response.data;
