@@ -50,7 +50,9 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold text-gray-800">
             Panel de Control de Turnos
           </h1>
-          <Button variant="primary">Llamar siguiente turno</Button>
+          {currentTurno && (
+            <Button variant="primary">Llamar siguiente turno</Button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -106,7 +108,7 @@ const Dashboard = () => {
             </div>
             ): (
               <div className="text-center py-8">
-                <p className="text-gray-500">No hay turno actual</p>
+                <p className="text-gray-500">Selecciona un turno</p>
               </div>
             )}
           </Card>
