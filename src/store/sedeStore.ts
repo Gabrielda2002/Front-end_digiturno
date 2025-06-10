@@ -9,6 +9,7 @@ interface SedeState {
   error: string | null;
   fetchSedes: () => Promise<void>;
   setCurrentSede: (sede: Sede) => void;
+  fetchCurrentSede: (sedeId: string) => Promise<void>;
   createSede: (sede: Partial<Sede>) => Promise<Sede | null>;
   updateSede: (id: string, sede: Partial<Sede>) => Promise<Sede | null>;
   deleteSede: (id: string) => Promise<boolean>;
@@ -32,6 +33,17 @@ export const useSedeStore = create<SedeState>((set, get) => ({
 
   setCurrentSede: (sede: Sede) => {
     set({ currentSede: sede });
+  },
+
+  fetchCurrentSede: async (sedeId: string) => {
+    set({ loading: true, error: null });
+    try {
+      const sede = await sedeService.getSedeById(sedeId);
+      set({ currentSede: sede, loading: false });
+    } catch (error: any) {
+      set({ error: error.message || 'Error al cargar sede actual', loading: false });
+      set({ currentSede: null }); // Resetea currentSede si falla
+    }
   },
 
   createSede: async (sede: Partial<Sede>) => {

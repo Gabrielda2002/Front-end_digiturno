@@ -8,6 +8,7 @@ interface ReasonState {
     loading: boolean;
     error : string | null;
     fetchReasons: () => Promise<void>;
+    fetchReasonsByHeadquarter: (headquarterId: string) => Promise<void>;
     setCurrentReason: (reason: MotivoVisita) => void;
     createReason: (reason: Partial<MotivoVisita>) => Promise<MotivoVisita | null>;
     updateReason: (id: string, reason: Partial<MotivoVisita>) => Promise<MotivoVisita | null>;
@@ -27,6 +28,16 @@ export const useReasonStore = create<ReasonState>((set, get) => ({
             set({ reasons, loading: false });
         } catch (error: any) {
             set({error: error.message || 'Error al cargar motivos de visita', loading: false });
+        }
+    },
+
+    fetchReasonsByHeadquarter: async (headquarterId: string) => {
+        set({ loading: true, error: null });
+        try {
+            const reasons = await motivoVisitaService.getMotivosBySede(headquarterId);
+            set({ reasons, loading: false });
+        } catch (error: any) {
+            set({ error: error.message || 'Error al cargar motivos de visita por sede', loading: false });
         }
     },
 

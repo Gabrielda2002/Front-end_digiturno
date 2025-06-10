@@ -1,38 +1,43 @@
-import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import './App.css';
-import { ToastContainer } from 'react-toastify';
+// src/App.tsx
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import "./App.css";
+import { ToastContainer } from "react-toastify";
 
 // Pages
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Turnos from './pages/Turnos';
-import Reportes from './pages/Reportes';
-import Configuracion from './features/Configuration/Page/Configuracion';
-import AutoServicio from './pages/AutoServicio';
-import PantallaTV from './pages/PantallaTV';
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Turnos from "./pages/Turnos";
+import Reportes from "./pages/Reportes";
+import Configuracion from "./features/Configuration/Page/Configuracion";
+import AutoServicio from "./features/AutoService/Page/AutoServicio";
+import PantallaTV from "./pages/PantallaTV";
+import Setup from "./pages/Setup";
 
 // Components
-import ProtectedRoute from './components/auth/ProtectedRoute';
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // Store
-import { useAuthStore } from './store/authStore';
-import { useSedeStore } from './store/sedeStore';
+import { useAuthStore } from "./store/authStore";
+import { useSedeStore } from "./store/sedeStore";
+import { InstallationProvider, useInstallation } from "./contexts/InstallationContext";
 
-function App() {
+function AppContent() {
   const { isAuthenticated, authChecked, checkAuth } = useAuthStore();
   const { fetchSedes } = useSedeStore();
-  
+  const { isConfigured } = useInstallation();
+  console.log("isconfigured", isConfigured);
+
   useEffect(() => {
     // Verificar si hay una sesión activa al cargar la app
     checkAuth();
-    
-    // Cargar sedes disponibles
+
+    // Cargar sedes disponibles solo si está autenticado
     if (isAuthenticated) {
       fetchSedes();
     }
   }, [isAuthenticated, checkAuth, fetchSedes]);
-  
+
   // Página de carga mientras se verifica la autenticación
   if (!authChecked) {
     return (
@@ -46,67 +51,116 @@ function App() {
   }
 
   return (
-      <BrowserRouter>
+    <BrowserRouter>
       <Routes>
+        {/* Ruta de configuración inicial - DEBE ir primero */}
+        <Route path="/setup" element={<Setup />} />
+        
         {/* Rutas públicas */}
-        <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" replace />} />
+        <Route
+          path="/login"
+          element={
+            !isAuthenticated ? (
+              <Login />
+            ) : isConfigured ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Navigate to="/setup" replace />
+            )
+          }
+        />
         <Route path="/autoservicio" element={<AutoServicio />} />
         <Route path="/pantalla" element={<PantallaTV />} />
-        
-        {/* Rutas protegidas - requieren autenticación */}
-        <Route 
-          path="/dashboard" 
+
+        {/* Rutas protegidas - requieren autenticación Y configuración */}
+        <Route
+          path="/dashboard"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <Dashboard />
-            </ProtectedRoute>
+            isConfigured ? (
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <Dashboard />
+              </ProtectedRoute>
+            ) : (
+              <Navigate to="/setup" replace />
+            )
           }
         />
-        <Route 
-          path="/turnos" 
+        <Route
+          path="/turnos"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <Turnos />
-            </ProtectedRoute>
+            isConfigured ? (
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <Turnos />
+              </ProtectedRoute>
+            ) : (
+              <Navigate to="/setup" replace />
+            )
           }
         />
-        <Route 
-          path="/reportes" 
+        <Route
+          path="/reportes"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <Reportes />
-            </ProtectedRoute>
+            isConfigured ? (
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <Reportes />
+              </ProtectedRoute>
+            ) : (
+              <Navigate to="/setup" replace />
+            )
           }
         />
-        <Route 
-          path="/configuracion" 
+        <Route
+          path="/configuracion"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated} requiredRole="admin">
-              <Configuracion />
-            </ProtectedRoute>
-          }
-        />
-        
-        {/* Redireccionar al dashboard si está autenticado, o al login si no */}
-        <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
-        
-        {/* Ruta para página no encontrada */}
-        <Route path="*" element={
-          <div className="flex h-screen items-center justify-center bg-gray-100">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
-              <p className="text-xl text-gray-600 mb-6">Página no encontrada</p>
-              <button 
-                onClick={() => window.history.back()} 
-                className="px-4 py-2 bg-primary text-white rounded hover:bg-blue-700"
+            isConfigured ? (
+              <ProtectedRoute
+                isAuthenticated={isAuthenticated}
+                requiredRole="admin"
               >
-                Volver atrás
-              </button>
+                <Configuracion />
+              </ProtectedRoute>
+            ) : (
+              <Navigate to="/setup" replace />
+            )
+          }
+        />
+
+        {/* Ruta raíz con lógica de redirección */}
+        <Route
+          path="/"
+          element={
+            !isConfigured ? (
+              <Navigate to="/setup" replace />
+            ) : !isAuthenticated ? (
+              <Navigate to="/login" replace />
+            ) : (
+              <Navigate to="/dashboard" replace />
+            )
+          }
+        />
+
+        {/* Ruta para página no encontrada */}
+        <Route
+          path="*"
+          element={
+            <div className="flex h-screen items-center justify-center bg-gray-100">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
+                <p className="text-xl text-gray-600 mb-6">
+                  Página no encontrada
+                </p>
+                <button
+                  onClick={() => window.history.back()}
+                  className="px-4 py-2 bg-primary text-white rounded hover:bg-blue-700"
+                >
+                  Volver atrás
+                </button>
+              </div>
             </div>
-          </div>
-        } />
+          }
+        />
       </Routes>
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={5000}
         hideProgressBar={false}
@@ -119,6 +173,14 @@ function App() {
         theme="light"
       />
     </BrowserRouter>
+  );
+}
+
+function App() {
+  return (
+    <InstallationProvider>
+      <AppContent />
+    </InstallationProvider>
   );
 }
 
