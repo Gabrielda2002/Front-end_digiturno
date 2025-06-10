@@ -1,9 +1,12 @@
-import { useState } from 'react';
-import { useSedeStore } from '../store/sedeStore';
-import { useTurnoStore } from '../store/turnoStore';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
+import { useEffect, useState } from 'react';
+import { useSedeStore } from '../../../store/sedeStore';
+// import { useTurnoStore } from '../../../store/turnoStore';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
+import Input from '../../../components/ui/Input';
+import { useReasonStore } from '@/store/reasonStore';
+import { useTurnoStore } from '@/store/turnoStore';
+import { useInstallation } from '@/contexts/InstallationContext';
 
 const AutoServicio = () => {
   const [cedula, setCedula] = useState('');
@@ -14,16 +17,30 @@ const AutoServicio = () => {
   const [error, setError] = useState<string | null>(null);
   const [ticket, setTicket] = useState<any>(null);
   
-  const { currentSede } = useSedeStore();
-  const { createTurno: crearTurno } = useTurnoStore();
-  const [motivosVisita] = useState<{id: string, nombre: string}[]>([
-    { id: '1', nombre: 'Información general' },
-    { id: '2', nombre: 'Pagos' },
-    { id: '3', nombre: 'Servicios' },
-    { id: '4', nombre: 'Reclamos' },
-    { id: '5', nombre: 'Otros' },
-  ]);
+  const { installation } = useInstallation();
+  const { currentSede, fetchCurrentSede } = useSedeStore();
+  const { reasons, fetchReasonsByHeadquarter } = useReasonStore();
+  const { createTurno } = useTurnoStore();
   
+  useEffect(() => {
+
+    const initializeAutoService = async () => {
+      if (installation.sedeId) {
+        try {
+
+          await fetchCurrentSede(installation.sedeId);
+          await fetchReasonsByHeadquarter(installation.sedeId);
+
+        } catch (error) {
+          console.log('Error al inicializar el servicio de turnos:', error);
+          setError('Error al cargar la sede o motivos de visita');
+        }
+      }
+    }
+
+    initializeAutoService();
+  }, [installation.sedeId, fetchCurrentSede, fetchReasonsByHeadquarter]);
+
   const handleSubmitCedula = (e: React.FormEvent) => {
     e.preventDefault();
     if (cedula.length < 5) {
@@ -40,18 +57,19 @@ const AutoServicio = () => {
     
     try {
       // Simulamos la creación del turno
-      const nuevoTurno = await crearTurno({
-        cedula,
+      const nuevoTurno = await createTurno({
+        sede_id: installation.sedeId,
         motivo_id: id,
-        sede_id: currentSede?.id || ''
+        cedula,
       });
       
+      const reasonSelected = reasons.find((r) => r.id === id);
       setTicket({
-        codigo: nuevoTurno?.numero_turno || 'A001',
-        motivo: motivosVisita.find(m => m.id === id)?.nombre || 'Desconocido',
-        fecha: new Date().toLocaleDateString(),
-        hora: new Date().toLocaleTimeString()
-      });
+        codigo: nuevoTurno?.numero_turno || '0001',
+        motivo: reasonSelected?.nombre || 'desconocido',
+        prefijo: reasonSelected?.prefijo || 'T',
+        sede: currentSede?.nombre || installation.nombre,
+      })
       
       setStep(3);
     } catch (err: any) {
@@ -60,6 +78,14 @@ const AutoServicio = () => {
       setLoading(false);
     }
   };
+
+  // filter reasons by sede
+  const reasonsFree = reasons.filter(r => 
+    r.activo && 
+    (installation.configuration.motivosPermitidos.length === 0 ||
+      installation.configuration.motivosPermitidos.includes(r.id)
+    )
+  );
   
   const resetForm = () => {
     setCedula('');
@@ -82,7 +108,12 @@ const AutoServicio = () => {
         <header className="bg-primary text-white p-4 text-center">
           <h1 className="text-3xl font-bold">DigiTurno</h1>
           <p className="text-xl">Sistema de turnos digitales</p>
-          <p>{currentSede?.nombre || 'Sede principal'}</p>
+          <p>{currentSede?.nombre || installation.nombre}</p>
+          {installation.ubicacion && (
+            <p className="text-sm text-gray-200">{installation.ubicacion}</p>
+          )
+
+          }
         </header>
         
         <div className="p-6">
@@ -119,13 +150,13 @@ const AutoServicio = () => {
               </form>
             </div>
           )}
-          
+          {/* ? selecciona el motivo de la visita */}
           {step === 2 && (
             <div className="text-center">
               <h2 className="text-2xl font-bold mb-6">Seleccione el motivo de su visita</h2>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                {motivosVisita.map((motivo) => (
+                {reasonsFree.map((motivo) => (
                   <Button
                     key={motivo.id}
                     variant="secondary"
@@ -133,10 +164,19 @@ const AutoServicio = () => {
                     onClick={() => handleSelectMotivo(motivo.id)}
                     disabled={loading}
                   >
-                    {motivo.nombre}
+                    <div className='text-center'>
+                      <div className='font-bold'>{motivo.prefijo}</div>
+                      <div className='text-sm'>{motivo.nombre}</div>
+                    </div>
                   </Button>
                 ))}
               </div>
+
+              {reasonsFree.length === 0 && (
+                <div className='text-gray-500 mt-4'>
+                  No hay motivos disponibles para su sede. Por favor, intente más tarde.
+                </div>
+              )}
               
               <Button 
                 variant="text"
